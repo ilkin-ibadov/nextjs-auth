@@ -1,6 +1,4 @@
-import { NextAuthOptions, getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
-import { redirect, useRouter } from "next/navigation";
+import { NextAuthOptions } from "next-auth";
 
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
@@ -22,28 +20,14 @@ export const authConfig: NextAuthOptions = {
   ],
   callbacks: {
     jwt: async ({ token, user }) => {
+      console.log("Token from method:", token)
       return ({ ...token, ...user })
     },
     session: async ({ session, token }) => {
-      console.log("Token from method:", token)
-
       session.user = token;
-
+      
       return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
-
-export async function loginIsRequiredServer() {
-  const session = await getServerSession(authConfig);
-  if (!session) return redirect("/");
-}
-
-export function loginIsRequiredClient() {
-  if (typeof window !== "undefined") {
-    const session = useSession();
-    const router = useRouter();
-    if (!session) router.push("/");
-  }
-}
